@@ -22,12 +22,6 @@ public class AchievementManager : MonoBehaviour
         instance = this;
         UpdateUI();
     }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
     public void Complete(int index, int reward)
     {
         Achievements[index].IsCompleted = PlayerPrefs.GetInt(Achievements[index].Name, 0) == 0 ? false : true;
@@ -39,7 +33,7 @@ public class AchievementManager : MonoBehaviour
             UpdateUI();
         }
     }
-    void UpdateUI()
+    private void UpdateUI()
     {
         foreach (Achievement achievement in Achievements)
         {
