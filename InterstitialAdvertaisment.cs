@@ -1,14 +1,12 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Advertisements;
 
-public class InterstitialAdvertaisment : MonoBehaviour,IUnityAdsLoadListener,IUnityAdsShowListener
+public class InterstitialAdvertaisment : MonoBehaviour, IUnityAdsLoadListener, IUnityAdsShowListener
 {
     public static InterstitialAdvertaisment instance;
-    public string AndroidAdvretaismentId = "Interstitial_Android";
-    public string IOSAdvretaismentId = "Interstitial_iOS";
-    public string AdvertaismentId;
+    public const string ANDROID_ADVRETAISMENT_ID = "Interstitial_Android";
+    public const string IOS_ADVRETAISMENT_ID = "Interstitial_iOS";
+    private string AdvertaismentId;
     public void OnUnityAdsAdLoaded(string placementId)
     {
         //throw new System.NotImplementedException();
@@ -24,11 +22,7 @@ public class InterstitialAdvertaisment : MonoBehaviour,IUnityAdsLoadListener,IUn
         //throw new System.NotImplementedException();
     }
 
-    public void OnUnityAdsShowComplete(string placementId, UnityAdsShowCompletionState showCompletionState)
-    {
-        //throw new System.NotImplementedException();
-        LoadAdvertaisment();
-    }
+    public void OnUnityAdsShowComplete(string placementId, UnityAdsShowCompletionState showCompletionState) => LoadAdvertaisment();
 
     public void OnUnityAdsShowFailure(string placementId, UnityAdsShowError error, string message)
     {
@@ -39,21 +33,13 @@ public class InterstitialAdvertaisment : MonoBehaviour,IUnityAdsLoadListener,IUn
     {
         //throw new System.NotImplementedException();
     }
-
-    // Start is called before the first frame update
-    void Awake()
+    private void Awake()
     {
         instance = this;
         AdvertaismentId = (Application.platform == RuntimePlatform.IPhonePlayer)
-            ? IOSAdvretaismentId
-            : AndroidAdvretaismentId;
+            ? IOS_ADVRETAISMENT_ID
+            : ANDROID_ADVRETAISMENT_ID;
     }
-    public void LoadAdvertaisment()
-    {
-        Advertisement.Load(AdvertaismentId, this);
-    }
-    public void ShowAdvertaisment()
-    {
-        Advertisement.Show(AdvertaismentId, this);
-    }
+    public void LoadAdvertaisment() => Advertisement.Load(AdvertaismentId, this);
+    public void ShowAdvertaisment() => Advertisement.Show(AdvertaismentId, this);
 }

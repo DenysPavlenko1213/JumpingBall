@@ -1,46 +1,42 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
     [Header("Variebles")]
-    private CharacterController controller;
-    public Vector3 dir;
+    [SerializeField] private CharacterController controller;
+    private Vector3 dir;
     public GameObject GUI;
     public GameObject MenuPanel;
     public GameObject GameOverPanel;
-    bool GameStarted;
-    [SerializeField]private float speed = 2;
-    private const int maxSpeed = 100;
+    private bool IsGameStarted;
+    [SerializeField] private float speed = 2;
+    private const int MAX_SPEED = 100;
     public FixedJoystick joystick;
     public int money;
-    public Score scoremanger;
+    public ScoreManager scoremanger;
     public Text recordText;
     public AchievementManager achievementManager;
-    int tryCount = 0;
     private int currentcharacterindex;
     [Header("Gravity")]
     public float jumpForce;
-    private float gravity = -9.8f;
+    private const float GRAVITY = -9.8f;
     public CharacterData[] CharacterStats;
-    bool IsGrounded = false;
+    private bool IsGrounded = false;
     public LayerMask ground;
     private Vector3 velocity = Vector3.zero;
-    public float grounddistance;
-    bool FireResist;
+    private const int GROUND_DISTANCE = 1;
+    private bool FireResist;
     [Header("GUI")]
     public Text MoneyText;
     public GameObject[] Modificators;
     [Header("Music")]
-    public AudioClip moneyeffect;
-    public AudioClip jump;
-    // Start is called before the first frame update
-    void Start()
+    [SerializeField] private AudioClip moneyeffect;
+    [SerializeField] private AudioClip jump;
+    private void Start()
     {
         Time.timeScale = 1;
-        controller = GetComponent<CharacterController>();
         currentcharacterindex = PlayerPrefs.GetInt("SelectedCharacter", 0);
         UpdateCharacterStats();
         GUI.SetActive(false);
@@ -48,32 +44,19 @@ public class PlayerController : MonoBehaviour
         MenuPanel.SetActive(true);
         scoremanger.ScoreMultipleire = 0;
         InterstitialAdvertaisment.instance.LoadAdvertaisment();
-        //RewardedAdveraisment.instance.LoadAdvertaisment();
         money = PlayerPrefs.GetInt("Money");
         MoneyText.text = money.ToString();
         StartCoroutine(SpeedIncrease());
         foreach (GameObject Modificator in Modificators)
-        {
             Modificator.SetActive(false);
-        }
     }
-    private void FixedUpdate()
-    {
-        if (transform.position.y < 0)
-        {
-            transform.position = new Vector3(0, 1, transform.position.z);
-            GameOver();
-        }
-    }
-
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
         GroundCheck();
         Gravity();
-        StartGame();
+        IsStartGame();
         Jump();
-        if (GameStarted)
+        if (IsGameStarted)
         {
             dir.x = joystick.Horizontal;
             dir.z = speed;
@@ -82,74 +65,44 @@ public class PlayerController : MonoBehaviour
             transform.Rotate(50 * Time.deltaTime, 0, 0);
             controller.Move(dir * Time.deltaTime);
         }
+        if (transform.position.y > 0) return;
+        transform.position = new Vector3(0, 1, transform.position.z);
+        GameOver();
     }
-    bool StartGame()
+    private bool IsStartGame()
     {
-        if (SwipeController.swipeLeft)
-        {
-            GameStarted = true;
-        }
-        if (SwipeController.swipeRight)
-        {
-            GameStarted = true;
-        }
-        if (SwipeController.swipeUp)
-        {
-            GameStarted = true;
-        }
-        return GameStarted;
+        if (SwipeController.swipeLeft || SwipeController.swipeRight || SwipeController.swipeUp)
+            IsGameStarted = true;
+        return IsGameStarted;
     }
-    void GroundCheck()
+    private void GroundCheck() => IsGrounded = Physics.CheckSphere(transform.position, GROUND_DISTANCE, ground);
+    private void Gravity()
     {
-        IsGrounded = Physics.CheckSphere(transform.position, grounddistance, ground);
-    }
-    void Gravity()
-    {
-        if(IsGrounded && velocity.y < 0)
-        {
-            velocity.y = -2f;
-        }
-        velocity.y += gravity * Time.deltaTime;
+        if (IsGrounded && velocity.y < 0) velocity.y = -2f;
+        velocity.y += GRAVITY * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
     }
-    void Jump()
+    private void Jump()
     {
-        if (IsGrounded && SwipeController.swipeUp)
-        {
-            SoundManager.instance.PlayEffect(jump);
-            velocity.y += Mathf.Sqrt(jumpForce * -2f * gravity);
-        }
+        if (!IsGrounded || !SwipeController.swipeUp) return;
+        SoundManager.instance.PlayEffect(jump);
+        velocity.y += Mathf.Sqrt(jumpForce * -2f * GRAVITY);
     }
-    void GameOver()
+    private void GameOver()
     {
         int lastscore = PlayerPrefs.GetInt("lastscore");
         int recordscore = PlayerPrefs.GetInt("recordscore");
         if (lastscore > recordscore)
         {
             recordscore = lastscore;
-            PlayerPrefs.SetInt("recordscore",recordscore);
+            PlayerPrefs.SetInt("recordscore", recordscore);
             recordText.text = "Record:" + recordscore.ToString();
         }
-        else
-        {
-            recordText.text = "Record:" + recordscore.ToString();
-        }
-        if (lastscore >= 100)
-        {
-            achievementManager.Complete(0, 50);
-        }
-        if(lastscore >= 1000)
-        {
-            achievementManager.Complete(1, 100);
-        }
-        if (lastscore >= 10000)
-        {
-            achievementManager.Complete(5, 50);
-        }
-        if (lastscore >= 100000)
-        {
-            achievementManager.Complete(6, 50);
-        }
+        else recordText.text = "Record:" + recordscore.ToString();
+        if (lastscore >= 100) achievementManager.Complete(0, 50);
+        if (lastscore >= 1000) achievementManager.Complete(1, 100);
+        if (lastscore >= 10000) achievementManager.Complete(5, 50);
+        if (lastscore >= 100000) achievementManager.Complete(6, 50);
         if (!FireResist || CharacterStats[currentcharacterindex].buff == CharacterData.Buff.Protection)
         {
             GUI.SetActive(false);
@@ -165,15 +118,10 @@ public class PlayerController : MonoBehaviour
             PlayerPrefs.SetInt("lastscore", lastscore);
             GameOver();
             int rand = Random.Range(0, 3);
-            if (rand == 1 && !FireResist && PlayerPrefs.GetInt("removeadvertaisments")==0)
-            {
-                //Show
+            if (rand == 1 && !FireResist && PlayerPrefs.GetInt("removeadvertaisments") == 0)
                 InterstitialAdvertaisment.instance.ShowAdvertaisment();
-            }
             if (FireResist)
-            {
                 Destroy(other.gameObject);
-            }
         }
         else if (other.CompareTag("Money"))
         {
@@ -216,14 +164,12 @@ public class PlayerController : MonoBehaviour
     public void Rise()
     {
         Time.timeScale = 1;
-        transform.position = new Vector3(0,1,transform.position.z);
+        transform.position = new Vector3(0, 1, transform.position.z);
         StopAllCoroutines();
         SoundManager.instance.PlayEffect(jump);
-        velocity.y += Mathf.Sqrt(jumpForce * -2f * gravity);
+        velocity.y += Mathf.Sqrt(jumpForce * -2f * GRAVITY);
         foreach (GameObject Modificator in Modificators)
-        {
             Modificator.SetActive(false);
-        }
         GUI.SetActive(true);
         GameOverPanel.SetActive(false);
         StartCoroutine(Fireresist());
@@ -233,15 +179,10 @@ public class PlayerController : MonoBehaviour
         jumpForce = CharacterStats[currentcharacterindex].JumpForce;
         speed = CharacterStats[currentcharacterindex].speed;
         if (CharacterStats[currentcharacterindex].buff == CharacterData.Buff.DoubleScore)
-        {
             scoremanger.ScoreMultipleire = 2;
-        }
-        else
-        {
-            scoremanger.ScoreMultipleire = 0;
-        }
+        else scoremanger.ScoreMultipleire = 0;
     }
-    IEnumerator Fireresist()
+    private IEnumerator Fireresist()
     {
         FireResist = true;
         Modificators[1].SetActive(true);
@@ -249,7 +190,7 @@ public class PlayerController : MonoBehaviour
         Modificators[1].SetActive(false);
         FireResist = false;
     }
-    IEnumerator ScoreIncrease()
+    private IEnumerator ScoreIncrease()
     {
         scoremanger.ScoreMultipleire = 2;
         Modificators[0].SetActive(true);
@@ -257,7 +198,7 @@ public class PlayerController : MonoBehaviour
         Modificators[0].SetActive(false);
         scoremanger.ScoreMultipleire = 0;
     }
-    IEnumerator JumpForceIncrease()
+    private IEnumerator JumpForceIncrease()
     {
         jumpForce += 5;
         Modificators[2].SetActive(true);
@@ -265,9 +206,9 @@ public class PlayerController : MonoBehaviour
         Modificators[2].SetActive(false);
         jumpForce -= 5;
     }
-    IEnumerator SpeedIncrease()
+    private IEnumerator SpeedIncrease()
     {
-        if(speed < maxSpeed)
+        if (speed < MAX_SPEED)
         {
             yield return new WaitForSeconds(5f);
             speed++;

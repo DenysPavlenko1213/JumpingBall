@@ -4,49 +4,33 @@ using UnityEngine;
 using UnityEngine.Purchasing;
 using UnityEngine.UI;
 
-public class IAPManager : MonoBehaviour, IStoreListener //для получения сообщений из Unity Purchasing
+public class IAPManager : MonoBehaviour, IStoreListener
 {
     public static IAPManager instance;
     [SerializeField] private GameObject btnNoAds;
     [SerializeField] private GameObject btnVip;
-    public Text MoneyText;
+    [SerializeField] private Text MoneyText;
     public ShopManager shopManager;
-    //[SerializeField] private GameObject btnVip_afterBuy;
-    //[SerializeField] private GameObject vipBanner;
-
-    IStoreController m_StoreController;
-
-    private string removeadertaisments = "com.tenmesti.jumpingball.removeadvertaisments";
-    private string money100 = "com.tenmesti.jumpingball.money100";
-    private string money200 = "com.tenmesti.jumpingball.money200";
-    private string money500 = "com.tenmesti.jumpingball.money500";
-    private string money1000 = "com.tenmesti.jumpingball.money1000";
-    private string money2000 = "com.tenmesti.jumpingball.money2000";
-    private string unlockallcharacters = "com.tenmesti.jumpingball.unlockallcharacters";
-
-    void Start()
+    private IStoreController m_StoreController;
+    private const string removeadertaisments = "com.tenmesti.jumpingball.removeadvertaisments";
+    private const string money100 = "com.tenmesti.jumpingball.money100";
+    private const string money200 = "com.tenmesti.jumpingball.money200";
+    private const string money500 = "com.tenmesti.jumpingball.money500";
+    private const string money1000 = "com.tenmesti.jumpingball.money1000";
+    private const string money2000 = "com.tenmesti.jumpingball.money2000";
+    private const string unlockallcharacters = "com.tenmesti.jumpingball.unlockallcharacters";
+    private void Start()
     {
        GameObject[] gameObjects = GameObject.FindGameObjectsWithTag("NoReboot");
        if(gameObjects.Length > 1)
-        { 
             Destroy(gameObjects[0].gameObject);
-        }
-        DontDestroyOnLoad(this.gameObject);
+        DontDestroyOnLoad(gameObject);
         InitializePurchasing();
-        
-        //if (PlayerPrefs.HasKey("firstStart") == false)
-        //{
-        //    PlayerPrefs.SetInt("firstStart", 1);
-        //    RestoreMyProduct();
-        //}
-
         RestoreVariable();
     }
-
-    void InitializePurchasing()
+    private void InitializePurchasing()
     {
         var builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
-
         builder.AddProduct(removeadertaisments, ProductType.NonConsumable);
         builder.AddProduct(unlockallcharacters, ProductType.NonConsumable);
         builder.AddProduct(money100, ProductType.Consumable);
@@ -54,33 +38,18 @@ public class IAPManager : MonoBehaviour, IStoreListener //для получения сообщени
         builder.AddProduct(money500, ProductType.Consumable);
         builder.AddProduct(money1000, ProductType.Consumable);
         builder.AddProduct(money2000, ProductType.Consumable);
-
         UnityPurchasing.Initialize(this, builder);
     }
 
-    void RestoreVariable()
+    private void RestoreVariable()
     {
         if (PlayerPrefs.HasKey("removeadvertaisments"))
-        {
             btnNoAds.SetActive(false);
-        }
-
         if (PlayerPrefs.HasKey("unlockallcharacters"))
-        {
             btnVip.SetActive(false);
-            //btnVip_afterBuy.SetActive(true);
-        }
-
-        //if (PlayerPrefs.HasKey("ads") && PlayerPrefs.HasKey("vip"))
-        //{
-            //vipBanner.SetActive(true);
-        //}
     }
 
-    public void BuyProduct(string productName)
-    {
-        m_StoreController.InitiatePurchase(productName);
-    }
+    private void BuyProduct(string productName) => m_StoreController.InitiatePurchase(productName);
 
     public PurchaseProcessingResult ProcessPurchase(PurchaseEventArgs args)
     {
@@ -124,12 +93,6 @@ public class IAPManager : MonoBehaviour, IStoreListener //для получения сообщени
     {
         PlayerPrefs.SetInt("removeadvertaisments", 1);
         btnNoAds.SetActive(false);
-
-        //AdsCore.S.StopAllCoroutines();
-        //AdsCore.S.HideBanner();
-
-        //if (PlayerPrefs.HasKey("vip"))
-            //vipBanner.SetActive(true);
     }
 
     private void Product_UnlockAllCharacters()
@@ -147,18 +110,11 @@ public class IAPManager : MonoBehaviour, IStoreListener //для получения сообщени
     {
         PlayerPrefs.SetInt("Money", PlayerPrefs.GetInt("Money") + amount);
         MoneyText.text = PlayerPrefs.GetInt("Money").ToString();
-
     }
 
-    public void OnInitializeFailed(InitializationFailureReason error)
-    {
-        Debug.Log($"In-App Purchasing initialize failed: {error}");
-    }
+    public void OnInitializeFailed(InitializationFailureReason error) => Debug.Log($"In-App Purchasing initialize failed: {error}");
 
-    public void OnPurchaseFailed(Product product, PurchaseFailureReason failureReason)
-    {
-        Debug.Log($"Purchase failed - Product: '{product.definition.id}', PurchaseFailureReason: {failureReason}");
-    }
+    public void OnPurchaseFailed(Product product, PurchaseFailureReason failureReason) => Debug.Log($"Purchase failed - Product: '{product.definition.id}', PurchaseFailureReason: {failureReason}");
 
     public void OnInitialized(IStoreController controller, IExtensionProvider extensions)
     {
@@ -170,18 +126,4 @@ public class IAPManager : MonoBehaviour, IStoreListener //для получения сообщени
     {
         //throw new NotImplementedException();
     }
-
-
-    //public void RestoreMyProduct()
-    //{
-    //    if (CodelessIAPStoreListener.Instance.StoreController.products.WithID(noads).hasReceipt)
-    //    {
-    //        Product_NoAds();
-    //    }
-
-    //    if (CodelessIAPStoreListener.Instance.StoreController.products.WithID(vip).hasReceipt)
-    //    {
-    //        Product_VIP();
-    //    }
-    //}
 }

@@ -1,29 +1,14 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class SoundManager : MonoBehaviour
 {
     public static SoundManager instance;
-    public AudioSource music;
-    public AudioSource effect;
-    // Start is called before the first frame update
+    [SerializeField] private AudioSource music;
+    [SerializeField] private AudioSource effect;
     void Start()
     {
-        if(instance == null)
-        {
-            instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+        instance = this;
         music.Play();
     }
-    public void PlayEffect(AudioClip clip)
-    {
-        effect.PlayOneShot(clip);
-    }
+    public void PlayEffect(AudioClip clip) => effect.PlayOneShot(clip);
 }

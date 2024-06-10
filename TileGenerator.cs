@@ -1,46 +1,39 @@
-using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.Pool;
 using UnityEngine;
 
 public class TileGenerator : MonoBehaviour
 {
-    public GameObject[] tilePrefabs;
-    private float tilelength = 100;
-    private float spawnPos = 0;
-    public Transform player;
-    List<GameObject> activetiles = new List<GameObject>();
-    public int starttiles = 10;
-    // Start is called before the first frame update
-    void Start()
+    [SerializeField] private GameObject[] tilePrefabs;
+    private int spawnPositions = 0;
+    [SerializeField] private Transform player;
+    private List<GameObject> activeTiles = new List<GameObject>();
+    [Header("Constantes")]
+    private const int START_TILES_COUNT = 10;
+    private const int TILE_LENGTH = 100;
+    private void Start()
     {
-        for (int i = 0; i < starttiles; i++)
-        {
-            if(i == 0)
-            {    
-                Spawn(0);
-            }
+        Spawn(0);
+        for (int i = 0; i < START_TILES_COUNT - 1; i++)
             Spawn(Random.Range(0, tilePrefabs.Length));
-        }
     }
-
-    // Update is called once per frame
     void FixedUpdate()
     {
-        if(player.position.z - 10> spawnPos - (starttiles * tilelength))
+        if (player.position.z - 10 > spawnPositions - (START_TILES_COUNT * TILE_LENGTH))
         {
             Spawn(Random.Range(0, tilePrefabs.Length));
             DeleteTile();
         }
     }
-    private void Spawn(int tileindex)
+    private void Spawn(int tileIndex)
     {
-        GameObject newtile = Instantiate(tilePrefabs[tileindex], transform.forward * spawnPos, Quaternion.identity);
-        activetiles.Add(newtile);
-        spawnPos += tilelength;
+        GameObject newtile = Instantiate(tilePrefabs[tileIndex], transform.forward * spawnPositions, Quaternion.identity);
+        activeTiles.Add(newtile);
+        spawnPositions += TILE_LENGTH;
     }
-    void DeleteTile()
+    private void DeleteTile()
     {
-        Destroy(activetiles[0]);
-        activetiles.RemoveAt(0);
+        Destroy(activeTiles[0]);
+        activeTiles.RemoveAt(0);
     }
 }

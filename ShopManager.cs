@@ -19,72 +19,44 @@ public class ShopManager : MonoBehaviour
     public CharacterSelector characterSelector;
     public CharacterShop[] characterShop;
     private int characterscount = 1;
-    // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
         currentcharacterindex = PlayerPrefs.GetInt("SelectedCharacter", 0);
         foreach (GameObject character in Characters)
-        {
             character.SetActive(false);
-        }
         Characters[currentcharacterindex].SetActive(true);
         characterSelector.SelectCharacter();
         foreach (CharacterShop character in characterShop)
         {
             if(character.price == 0 || PlayerPrefs.HasKey("unlockallcharacters"))
-            {
                 character.IsUnlocked = true;
-            }
-            else
-            {
-                character.IsUnlocked = PlayerPrefs.GetInt(character.Name, 0)==0?false:true;
-            }
-            if(characterscount == characterShop.Length)
-            {
+            else character.IsUnlocked = PlayerPrefs.GetInt(character.Name, 0) == 0 ? false : true;
+            if (characterscount == characterShop.Length)
                 AchievementManager.instance.Complete(3, 0);
-            }
         }
         UpdateUI();
     }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-    public void Next()
+    private void Next()
     {
         Characters[currentcharacterindex].SetActive(false);
         currentcharacterindex++;
-        if(currentcharacterindex == Characters.Length)
-        {
-            currentcharacterindex = 0;
-        }
+        if(currentcharacterindex == Characters.Length) currentcharacterindex = 0;
         Characters[currentcharacterindex].SetActive(true);
         UpdateUI();
         CharacterShop ch = characterShop[currentcharacterindex];
-        if (!ch.IsUnlocked)
-        {
-            return;
-        }
+        if (!ch.IsUnlocked) return;
         PlayerPrefs.SetInt("SelectedCharacter", currentcharacterindex);
         characterSelector.SelectCharacter();
     }
-    public void Previos()
+    private void Previos()
     {
         Characters[currentcharacterindex].SetActive(false);
         currentcharacterindex--;
-        if (currentcharacterindex == -1)
-        {
-            currentcharacterindex = Characters.Length - 1;
-        }
+        if (currentcharacterindex == -1) currentcharacterindex = Characters.Length - 1;
         Characters[currentcharacterindex].SetActive(true);
         UpdateUI();
         CharacterShop ch = characterShop[currentcharacterindex];
-        if (!ch.IsUnlocked)
-        {
-            return;
-        }
+        if (!ch.IsUnlocked) return;
         PlayerPrefs.SetInt("SelectedCharacter", currentcharacterindex);
         characterSelector.SelectCharacter();
     }
