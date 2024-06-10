@@ -38,14 +38,8 @@ public class AchievementManager : MonoBehaviour
         foreach (Achievement achievement in Achievements)
         {
             achievement.IsCompleted = PlayerPrefs.GetInt(achievement.Name, 0) == 0 ? false : true;
-            if (!achievement.IsCompleted)
-            {
-                achievement.completeText.gameObject.SetActive(false);
-            }
-            else
-            {
-                achievement.completeText.gameObject.SetActive(true);
-            }
+            if (!achievement.IsCompleted) achievement.completeText.gameObject.SetActive(false);
+            else achievement.completeText.gameObject.SetActive(true);
         }
     }
 }
