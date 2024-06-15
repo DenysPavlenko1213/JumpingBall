@@ -3,8 +3,8 @@ using UnityEngine.Advertisements;
 
 public class AdvertaismentsManager : MonoBehaviour, IUnityAdsInitializationListener
 {
-    public const string ANDROID_GAME_ID = "5278325";
-    public const string IOS_GAME_ID = "5278324";
+    public const string ANDROID_GAME_ID = // 
+    public const string IOS_GAME_ID = // 
     [SerializeField] private bool testMode;
     private string gameId;
     public void OnInitializationComplete() => Debug.Log("Initialized");
