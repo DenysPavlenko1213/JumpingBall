@@ -13,10 +13,10 @@ public class AchievementManager : MonoBehaviour
     }
     public Achievement[] Achievements;
     [SerializeField] private Text MoneyText;
-    public static AchievementManager instance;
+    public static AchievementManager Instance;
     private void Start()
     {
-        instance = this;
+        Instance = this;
         UpdateUI();
     }
     public void Complete(int index, int reward)
